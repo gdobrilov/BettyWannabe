@@ -1,0 +1,62 @@
+﻿//using System;
+//using BettyWannabe.Interface;
+//using SharedClasses;
+
+//namespace BettyWannabe.Commands
+//{
+//	public class DepositCommand : ICommand
+//	{
+//		private readonly decimal amount;
+//		private readonly MessagePublisher messagePublisher;
+
+//        public DepositCommand(decimal amount, MessagePublisher messagePublisher)
+//		{
+//			this.amount = amount;
+//			this.messagePublisher = messagePublisher;
+//		}
+
+//		public void Execute()
+//		{
+//			var walletUpdateMessage = new WalletUpdateMessage()
+//			{
+//				Amount = this.amount,
+//				IsBet = false,
+//				IsDeposit = true
+//			};
+
+//			this.messagePublisher.PublishMessage<WalletUpdateMessage>(walletUpdateMessage, "walletQueue");
+//		}
+//	}
+//}
+
+using System;
+using System.Threading.Tasks;
+using BettyWannabe.Interface;
+using SharedClasses;
+
+namespace BettyWannabe.Commands
+{
+    public class DepositCommand : ICommand
+    {
+        private readonly decimal amount;
+        private readonly MessagePublisher messagePublisher;
+
+        public DepositCommand(decimal amount, MessagePublisher messagePublisher)
+        {
+            this.amount = amount;
+            this.messagePublisher = messagePublisher;
+        }
+
+        public async Task ExecuteAsync()
+        {
+            var walletUpdateMessage = new WalletUpdateMessage()
+            {
+                Amount = this.amount,
+                IsBet = false,
+                IsDeposit = true
+            };
+
+            await messagePublisher.PublishMessageAsync<WalletUpdateMessage>(walletUpdateMessage, "walletQueue");
+        }
+    }
+}
