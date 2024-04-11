@@ -4,15 +4,16 @@ using GameService.Models;
 using GameService.Interface;
 using SharedClasses;
 using GameService.Messaging;
+using SharedClasses.Interface;
 
 namespace GameService.Core.Services
 {
     public class GameService : IGameService
     {
         private IGame game;
-        private MessagePublisher publisher;
+        private IMessagePublisher publisher;
 
-        public GameService(IGame game, MessagePublisher messagePublisher)
+        public GameService(IGame game, IMessagePublisher messagePublisher)
         {
             this.game = game ?? throw new ArgumentNullException(nameof(game));
             this.publisher = messagePublisher ?? throw new ArgumentNullException(nameof(messagePublisher));

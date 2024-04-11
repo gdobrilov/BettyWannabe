@@ -12,7 +12,6 @@ namespace GameService.Models
             if (bet.Amount < 1 || bet.Amount > 10)
                 throw new ArgumentException("Bet amount must be between $1 and $10.");
 
-            // Determine the outcome
             double outcomeProbability = this.random.NextDouble();
             return CalculateWinAmount(bet.Amount, outcomeProbability);
 		}
@@ -26,11 +25,15 @@ namespace GameService.Models
             else if (outcomeProbability <= 0.9)
             {
                 decimal winMultiplier = (decimal)(1.0 + this.random.NextDouble());
+                winMultiplier = Math.Round(winMultiplier, 2);
+
                 return new Tuple<bool, decimal>(true, betAmount * winMultiplier);
             }
             else
             {
                 decimal winMultiplier = (decimal)(2.0 + this.random.NextDouble() * 8.0);
+                winMultiplier = Math.Round(winMultiplier, 2);
+
                 return new Tuple<bool, decimal>(true, betAmount * winMultiplier);
             }
         }

@@ -1,43 +1,8 @@
-﻿//using System;
-//using BettyWannabe.Factory;
-
-//namespace BettyWannabe
-//{
-//    public class CommandHandler
-//    {
-//        private readonly CommandFactory commandFactory;
-
-//        public CommandHandler(CommandFactory commandFactory)
-//        {
-//            this.commandFactory = commandFactory;
-//        }
-
-//        public void Run()
-//        {
-//            while (true)
-//            {
-//                Console.Write("Please submit action:");
-//                var input = Console.ReadLine();
-//                if (string.IsNullOrWhiteSpace(input)) continue;
-
-//                try
-//                {
-//                    var command = this.commandFactory.Parse(input);
-//                    command.Execute();
-//                }
-//                catch (Exception ex)
-//                {
-//                    Console.WriteLine($"Error processing command: {ex.Message}");
-//                }
-//            }
-//        }
-//    }
-//}
-
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using BettyWannabe.Factory;
+using BettyWannabe.Interface;
 using Microsoft.Extensions.Hosting;
 using SharedClasses;
 
@@ -45,50 +10,53 @@ namespace BettyWannabe
 {
     public class CommandHandler : BackgroundService
     {
-        private readonly CommandFactory _commandFactory;
-        private readonly MessageResponseService _messageResponseService;
+        private readonly ICommandFactory commandFactory;
+        private readonly IMessageResponseService messageResponseService;
+        private readonly IConsoleService consoleService;
 
-        public CommandHandler(CommandFactory commandFactory, MessageResponseService messageResponseService)
+        public CommandHandler(ICommandFactory commandFactory, IMessageResponseService messageResponseService, IConsoleService console)
         {
-            _commandFactory = commandFactory;
-            _messageResponseService = messageResponseService;
+            this.commandFactory = commandFactory;
+            this.messageResponseService = messageResponseService;
+            this.consoleService = console;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Delay(1000);
 
-            Console.Write("Please submit action: ");
+            this.consoleService.Write("Please submit action: ");
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                var input = Console.ReadLine()?.Trim();
+                var input = this.consoleService.ReadLine()?.Trim();
 
                 if (string.Equals(input, "exit", StringComparison.OrdinalIgnoreCase)) break;
 
                 if (string.IsNullOrWhiteSpace(input))
                 {
-                    Console.WriteLine("No input detected, please enter a command.");
+                    this.consoleService.WriteLine("\nNo input detected, please enter a command.");
+                    this.consoleService.Write("Please submit action: ");
                     continue;
                 }
 
                 try
                 {
-                    var command = _commandFactory.Parse(input);
+                    var command = this.commandFactory.Parse(input);
                     await command.ExecuteAsync();
 
-                    if (_messageResponseService.GameOutcomeReceived?.Task != null)
+                    if (this.messageResponseService.GameOutcomeReceived?.Task != null)
                     {
-                        var outcome = await _messageResponseService.GameOutcomeReceived.Task;
-                        // Reset or nullify the TaskCompletionSource if necessary to prepare for the next command.
-                        _messageResponseService.GameOutcomeReceived = new TaskCompletionSource<string>();
-                        Console.Write("Please submit action: ");
+                        var outcome = await this.messageResponseService.GameOutcomeReceived.Task;
+
+                        this.messageResponseService.GameOutcomeReceived = new TaskCompletionSource<string>();
+                        this.consoleService.Write("Please submit action: ");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error processing command: {ex.Message}");
-                    Console.Write("Please submit action: ");
+                    this.consoleService.WriteLine(($"Error processing command: {ex.Message}"));
+                    this.consoleService.Write("Please submit action: ");
                 }
 
             }

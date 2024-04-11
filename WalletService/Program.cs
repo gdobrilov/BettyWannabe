@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SharedClasses;
+using SharedClasses.Interface;
 using WalletService.Interfaces;
 using WalletService.Messaging;
 using WalletService.Services;
@@ -18,13 +19,12 @@ class Program
             .ConfigureServices((hostContext, services) =>
             {
                 services.AddSingleton<IWalletService, WalletService.Services.WalletService>();
-                services.AddSingleton<MessagePublisher>();
-                services.AddSingleton<MessageSubscriber>(serviceProvider =>
+                services.AddSingleton<IMessagePublisher, MessagePublisher>();
+                services.AddHostedService<MessageSubscriber>(serviceProvider =>
                 {
                     var walletService = serviceProvider.GetRequiredService<IWalletService>();
-                    var messagePublisher = serviceProvider.GetRequiredService<MessagePublisher>();
+                    var messagePublisher = serviceProvider.GetRequiredService<IMessagePublisher>();
                     return new MessageSubscriber(walletService, messagePublisher);
                 });
-                services.AddHostedService<WalletMessageListener>();
             });
 }

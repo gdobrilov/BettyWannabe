@@ -5,9 +5,9 @@ namespace WalletService.Interfaces
 {
 	public interface IWalletService
 	{
-        public WalletBalanceUpdateMessage Deposit(WalletUpdateMessage message);
+        WalletBalanceUpdateMessage Deposit(WalletUpdateMessage message);
 
-        public WalletBalanceUpdateMessage Withdraw(WalletUpdateMessage amount);
+        WalletBalanceUpdateMessage Withdraw(WalletUpdateMessage message);
     }
 }
 

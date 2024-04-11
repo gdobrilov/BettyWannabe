@@ -1,36 +1,45 @@
-﻿using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using SharedClasses;
-using System;
+﻿using System;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Hosting;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using SharedClasses;
+using System.Threading;
+using System.Threading.Tasks;
 using GameService.Interface;
+using SharedClasses.Interface;
 
 namespace GameService.Messaging
 {
-    public class BetMessageSubscriber
+    public class BetMessageSubscriber : BackgroundService
     {
         private readonly IGameService gameService;
-        private IConnection _connection;
-        private IModel _channel;
-        private readonly string _queueName = "betQueue";
-        private readonly MessagePublisher messagePublisher;
+        private readonly IMessagePublisher messagePublisher;
+        private IConnection connection;
+        private IModel channel;
+        private readonly string queueName = "betQueue";
 
-        public BetMessageSubscriber(IGameService gameService, MessagePublisher publisher)
+        public BetMessageSubscriber(IGameService gameService, IMessagePublisher publisher)
         {
-            this.gameService = gameService;
-            this.messagePublisher = publisher;
+            this.gameService = gameService ?? throw new ArgumentNullException(nameof(gameService));
+            this.messagePublisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
+            InitializeRabbitMQListener();
         }
 
-        public void StartListening()
+        private void InitializeRabbitMQListener()
         {
             var factory = new ConnectionFactory() { HostName = "localhost" };
-            _connection = factory.CreateConnection();
-            _channel = _connection.CreateModel();
+            this.connection = factory.CreateConnection();
+            this.channel = this.connection.CreateModel();
+            this.channel.QueueDeclare(queue: this.queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+        }
 
-            _channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            stoppingToken.ThrowIfCancellationRequested();
 
-            var consumer = new EventingBasicConsumer(_channel);
+            var consumer = new EventingBasicConsumer(this.channel);
             consumer.Received += async (model, ea) =>
             {
                 var body = ea.Body.ToArray();
@@ -42,7 +51,7 @@ namespace GameService.Messaging
                     try
                     {
                         await this.gameService.PlayBetAsync(betMessage);
-                        _channel.BasicAck(ea.DeliveryTag, false);
+                        this.channel.BasicAck(ea.DeliveryTag, false);
                     }
                     catch (Exception ex)
                     {
@@ -52,19 +61,24 @@ namespace GameService.Messaging
                             IsSuccessful = false,
                             Message = $"{ex.Message}"
                         };
-
                         await this.messagePublisher.PublishMessageAsync<WalletBalanceUpdateMessage>(message, "gameOutcomeQueue");
                     }
                 }
             };
 
-            _channel.BasicConsume(queue: _queueName, autoAck: false, consumer: consumer);
+            this.channel.BasicConsume(queue: this.queueName, autoAck: false, consumer: consumer);
+
+            return Task.CompletedTask;
         }
 
-        public void StopListening()
+        public override void Dispose()
         {
-            _channel?.Close();
-            _connection?.Close();
+            if (this.channel.IsOpen)
+            {
+                this.channel.Close();
+                this.connection.Close();
+            }
+            base.Dispose();
         }
     }
 }

@@ -1,47 +1,17 @@
-﻿//using System;
-//using BettyWannabe.Interface;
-//using SharedClasses;
-
-//namespace BettyWannabe.Commands
-//{
-//	public class DepositCommand : ICommand
-//	{
-//		private readonly decimal amount;
-//		private readonly MessagePublisher messagePublisher;
-
-//        public DepositCommand(decimal amount, MessagePublisher messagePublisher)
-//		{
-//			this.amount = amount;
-//			this.messagePublisher = messagePublisher;
-//		}
-
-//		public void Execute()
-//		{
-//			var walletUpdateMessage = new WalletUpdateMessage()
-//			{
-//				Amount = this.amount,
-//				IsBet = false,
-//				IsDeposit = true
-//			};
-
-//			this.messagePublisher.PublishMessage<WalletUpdateMessage>(walletUpdateMessage, "walletQueue");
-//		}
-//	}
-//}
-
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using BettyWannabe.Interface;
 using SharedClasses;
+using SharedClasses.Interface;
 
 namespace BettyWannabe.Commands
 {
     public class DepositCommand : ICommand
     {
         private readonly decimal amount;
-        private readonly MessagePublisher messagePublisher;
+        private readonly IMessagePublisher messagePublisher;
 
-        public DepositCommand(decimal amount, MessagePublisher messagePublisher)
+        public DepositCommand(decimal amount, IMessagePublisher messagePublisher)
         {
             this.amount = amount;
             this.messagePublisher = messagePublisher;

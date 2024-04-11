@@ -7,6 +7,7 @@ using GameService.Interface;
 using GameService.Models;
 using GameService.Core.Services;
 using SharedClasses;
+using SharedClasses.Interface;
 
 class Program
 {
@@ -22,11 +23,10 @@ class Program
 
     private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
     {
-        services.AddSingleton<MessagePublisher>();
+        services.AddSingleton<IMessagePublisher, MessagePublisher>();
         services.AddSingleton<IGame, Game>();
         services.AddSingleton<IGameService, GameService.Core.Services.GameService>();
-        services.AddSingleton<BetMessageSubscriber>();
-        services.AddHostedService<BetListenerService>();
+        services.AddHostedService<BetMessageSubscriber>();
     }
 
     private static async Task RunHostAsync(IHost host)

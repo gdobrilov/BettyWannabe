@@ -2,14 +2,15 @@
 using BettyWannabe.Commands;
 using BettyWannabe.Interface;
 using SharedClasses;
+using SharedClasses.Interface;
 
 namespace BettyWannabe.Factory
 {
-    public class CommandFactory
+    public class CommandFactory : ICommandFactory
     {
-        private MessagePublisher messagePublisher;
+        private IMessagePublisher messagePublisher;
 
-        public CommandFactory(MessagePublisher messagePublisher)
+        public CommandFactory(IMessagePublisher messagePublisher)
         {
             this.messagePublisher = messagePublisher;
         }

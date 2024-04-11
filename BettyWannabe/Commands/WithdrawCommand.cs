@@ -1,15 +1,16 @@
 ﻿using System;
 using BettyWannabe.Interface;
 using SharedClasses;
+using SharedClasses.Interface;
 
 namespace BettyWannabe.Commands
 {
 	public class WithdrawCommand : ICommand
     {
         private readonly decimal amount;
-        private readonly MessagePublisher messagePublisher;
+        private readonly IMessagePublisher messagePublisher;
 
-        public WithdrawCommand(decimal amount, MessagePublisher messagePublisher)
+        public WithdrawCommand(decimal amount, IMessagePublisher messagePublisher)
 		{
             this.amount = amount;
             this.messagePublisher = messagePublisher;

@@ -3,10 +3,11 @@ using System.Text;
 using System.Text.Json;
 using RabbitMQ.Client;
 using System.Threading.Tasks;
+using SharedClasses.Interface;
 
 namespace SharedClasses
 {
-    public class MessagePublisher
+    public class MessagePublisher : IMessagePublisher
     {
         private readonly ConnectionFactory factory;
 
@@ -17,7 +18,6 @@ namespace SharedClasses
 
         public async Task PublishMessageAsync<T>(T message, string queueName)
         {
-            // Use Task.Run to create the connection and model on a background thread
             await Task.Run(() =>
             {
                 using (var connection = this.factory.CreateConnection())
