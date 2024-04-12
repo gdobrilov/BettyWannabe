@@ -45,13 +45,7 @@ namespace BettyWannabe
                     var command = this.commandFactory.Parse(input);
                     await command.ExecuteAsync();
 
-                    if (this.messageResponseService.GameOutcomeReceived?.Task != null)
-                    {
-                        var outcome = await this.messageResponseService.GameOutcomeReceived.Task;
-
-                        this.messageResponseService.GameOutcomeReceived = new TaskCompletionSource<string>();
-                        this.consoleService.Write("Please submit action: ");
-                    }
+                    await this.HandleGameOutcomeCompletion();
                 }
                 catch (Exception ex)
                 {
@@ -59,6 +53,17 @@ namespace BettyWannabe
                     this.consoleService.Write("Please submit action: ");
                 }
 
+            }
+        }
+
+        private async Task HandleGameOutcomeCompletion()
+        {
+            if (this.messageResponseService.GameOutcomeReceived?.Task != null)
+            {
+                await this.messageResponseService.GameOutcomeReceived.Task;
+
+                this.messageResponseService.GameOutcomeReceived = new TaskCompletionSource<string>();
+                this.consoleService.Write("Please submit action: ");
             }
         }
     }

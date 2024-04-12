@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 using GameService.Messaging;
 using GameService.Interface;
 using GameService.Models;
-using GameService.Core.Services;
+using GameService.Services;
 using SharedClasses;
 using SharedClasses.Interface;
 
@@ -25,7 +25,7 @@ class Program
     {
         services.AddSingleton<IMessagePublisher, MessagePublisher>();
         services.AddSingleton<IGame, Game>();
-        services.AddSingleton<IGameService, GameService.Core.Services.GameService>();
+        services.AddSingleton<IGameService, GameService.Services.GameService>();
         services.AddHostedService<BetMessageSubscriber>();
     }
 

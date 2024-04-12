@@ -15,7 +15,7 @@ namespace BettyWannabe.Factory
             this.messagePublisher = messagePublisher;
         }
 
-        public ICommand Parse(string input)
+        private (string command, decimal arg) HandleInput(string input)
         {
             var parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -26,6 +26,13 @@ namespace BettyWannabe.Factory
 
             var command = parts[0].ToLower();
             decimal arg = parts.Length > 1 ? decimal.Parse(parts[1]) : 0;
+
+            return (command, arg);
+        }
+
+        public ICommand Parse(string input)
+        {
+            (string command, decimal arg) = this.HandleInput(input);
 
             switch (command)
             {

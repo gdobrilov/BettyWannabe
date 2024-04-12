@@ -5,7 +5,7 @@ namespace GameService.Interface
 {
 	public interface IGame
 	{
-        public Tuple<bool, decimal> PlayGame(Bet bet);
+        public (bool isWin, decimal amount) PlayGame(Bet bet);
     }
 }
 

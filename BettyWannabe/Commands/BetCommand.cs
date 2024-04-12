@@ -9,6 +9,8 @@ namespace BettyWannabe.Commands
 	{
         private readonly decimal amount;
         private readonly IMessagePublisher messagePublisher;
+        private const int MinBetAmount = 1;
+        private const int MaxBetAmount = 1;
 
         public BetCommand(decimal amount, IMessagePublisher messagePublisher)
         {
@@ -18,9 +20,9 @@ namespace BettyWannabe.Commands
 
         public async Task ExecuteAsync()
         {
-            if (this.amount <  1 || this.amount > 10)
+            if (this.amount <  MinBetAmount || this.amount > MaxBetAmount)
             {
-                throw new ArgumentOutOfRangeException("Bet amount must be between $1 and $10.");
+                throw new ArgumentOutOfRangeException($"Bet amount must be between ${MinBetAmount} and ${MaxBetAmount}.");
             }
 
             var walletUpdateMessage = new WalletUpdateMessage()

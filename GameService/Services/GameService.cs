@@ -6,7 +6,7 @@ using SharedClasses;
 using GameService.Messaging;
 using SharedClasses.Interface;
 
-namespace GameService.Core.Services
+namespace GameService.Services
 {
     public class GameService : IGameService
     {
@@ -24,12 +24,12 @@ namespace GameService.Core.Services
             var bet = new Bet(betMessage.Amount);
             var gameOutcome = this.game.PlayGame(bet);
 
-            if (gameOutcome.Item1)
+            if (gameOutcome.isWin)
             {
                 await this.publisher.PublishMessageAsync<WalletUpdateMessage>(
                     new WalletUpdateMessage
                     {
-                        Amount = gameOutcome.Item2,
+                        Amount = gameOutcome.amount,
                         IsDeposit = true,
                         IsBet = true
                     },
@@ -50,8 +50,8 @@ namespace GameService.Core.Services
 
             return new WalletUpdateMessage
             {
-                Amount = gameOutcome.Item2,
-                IsDeposit = gameOutcome.Item1
+                Amount = gameOutcome.amount,
+                IsDeposit = gameOutcome.isWin
             };
         }
     }

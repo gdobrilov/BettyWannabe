@@ -35,6 +35,29 @@ namespace WalletService.Messaging
             this.channel.QueueDeclare(queue: this.queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
         }
 
+        private async Task HandleMessageProcessing(WalletUpdateMessage message)
+        {
+            if (message.IsDeposit)
+            {
+                var response = this.walletService.Deposit(message);
+
+                if (message.IsBet)
+                {
+                    await this.messagePublisher.PublishMessageAsync<WalletBalanceUpdateMessage>(response, "gameOutcomeQueue");
+                }
+                else
+                {
+                    await this.messagePublisher.PublishMessageAsync<WalletBalanceUpdateMessage>(response, "walletBalanceUpdateQueue");
+                }
+            }
+            else
+            {
+                var response = this.walletService.Withdraw(message);
+
+                await this.messagePublisher.PublishMessageAsync<WalletBalanceUpdateMessage>(response, "walletBalanceUpdateQueue");
+            }
+        }
+
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var consumer = new EventingBasicConsumer(this.channel);
@@ -46,25 +69,7 @@ namespace WalletService.Messaging
 
                 if (message != null)
                 {
-                    if (message.IsDeposit)
-                    {
-                        var response = this.walletService.Deposit(message);
-
-                        if (message.IsBet)
-                        {
-                            await this.messagePublisher.PublishMessageAsync<WalletBalanceUpdateMessage>(response, "gameOutcomeQueue");
-                        }
-                        else
-                        {
-                            await this.messagePublisher.PublishMessageAsync<WalletBalanceUpdateMessage>(response, "walletBalanceUpdateQueue");
-                        }
-                    }
-                    else
-                    {
-                        var response = this.walletService.Withdraw(message);
-
-                        await this.messagePublisher.PublishMessageAsync<WalletBalanceUpdateMessage>(response, "walletBalanceUpdateQueue");
-                    }
+                    await this.HandleMessageProcessing(message);
                 }
             };
 

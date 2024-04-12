@@ -11,28 +11,11 @@ using BettyWannabe.Interface;
 
 namespace BettyWannabe.MessageSubscriber
 {
-    public class GameMessageSubscriber : BackgroundService
+    public class GameMessageSubscriber : BaseMessageSubscriber
     {
-        private readonly IMessageResponseService messageResponseService;
-        private readonly IConsoleService consoleService;
-        private IConnection connection;
-        private IModel channel;
-        private string hostname = "localhost";
-        private string queueName = "gameOutcomeQueue";
-
         public GameMessageSubscriber(IMessageResponseService messageResponseService, IConsoleService console)
+            : base(messageResponseService, console, "gameOutcomeQueue")
         {
-            this.messageResponseService = messageResponseService;
-            this.consoleService = console;
-            this.InitializeRabbitMQListener();
-        }
-
-        private void InitializeRabbitMQListener()
-        {
-            var factory = new ConnectionFactory() { HostName = this.hostname };
-            this.connection = factory.CreateConnection();
-            this.channel = this.connection.CreateModel();
-            this.channel.QueueDeclare(queue: this.queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -57,16 +40,6 @@ namespace BettyWannabe.MessageSubscriber
             this.channel.BasicConsume(queue: this.queueName, autoAck: true, consumer: consumer);
 
             return Task.CompletedTask;
-        }
-
-        public override void Dispose()
-        {
-            if (this.channel.IsOpen)
-            {
-                this.channel.Close();
-                this.connection.Close();
-            }
-            base.Dispose();
         }
     }
 }
