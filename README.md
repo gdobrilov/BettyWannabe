@@ -15,7 +15,7 @@ Why settle for the original when you can have something that promises to evolve 
 - **Reliability**: State-of-the-art technology ensuring reliable service.
 
 ## BettyWannabe request flow
-[Deposit Withdrawal Message](Deposit%20withdrawal%20message.pdf)
+![Deposit Withdrawal Message](Deposit%20withdrawal%20message.png)
 
 ## Getting Started
 
